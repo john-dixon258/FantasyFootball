@@ -1,0 +1,95 @@
+[
+  {
+    "id": 1,
+    "first_name": "Alex",
+    "second_name": "Example",
+    "team": 1,
+    "element_type": 3,
+    "now_cost": 75,
+    "total_points": 120,
+    "minutes": 1800,
+    "goals_scored": 8,
+    "assists": 6
+  },
+  {
+    "id": 2,
+    "first_name": "Jamie",
+    "second_name": "Sample",
+    "team": 2,
+    "element_type": 2,
+    "now_cost": 62,
+    "total_points": 94,
+    "minutes": 1620,
+    "goals_scored": 2,
+    "assists": 4
+  },
+  {
+    "id": 3,
+    "first_name": "Morgan",
+    "second_name": "Demo",
+    "team": 3,
+    "element_type": 4,
+    "now_cost": 88,
+    "total_points": 137,
+    "minutes": 1710,
+    "goals_scored": 12,
+    "assists": 3
+  },
+  {
+    "id": 4,
+    "first_name": "Taylor",
+    "second_name": "Keeper",
+    "team": 4,
+    "element_type": 1,
+    "now_cost": 45,
+    "total_points": 85,
+    "minutes": 1800,
+    "goals_scored": 0,
+    "assists": 0
+  },
+  {
+    "id": 5,
+    "first_name": "Casey",
+    "second_name": "Value",
+    "team": 5,
+    "element_type": 3,
+    "now_cost": 55,
+    "total_points": 100,
+    "minutes": 1440,
+    "goals_scored": 5,
+    "assists": 7
+  },
+  {
+    "id": 6,
+    "first_name": "Riley",
+    "second_name": "Prospect",
+    "team": 6,
+    "element_type": 3,
+    "now_cost": 50,
+    "total_points": 12,
+    "minutes": 90,
+    "goals_scored": 1,
+    "assists": 0
+  },
+  {
+    "id": 7,
+    "first_name": "Jordan",
+    "second_name": "Reserve",
+    "team": 7,
+    "element_type": 2,
+    "now_cost": 40,
+    "total_points": 0,
+    "minutes": 0,
+    "goals_scored": 0,
+    "assists": 0
+  },
+  {
+    "id": 8,
+    "first_name": "Sam",
+    "second_name": "Unknown",
+    "team": 8,
+    "element_type": 4,
+    "now_cost": 60,
+    "total_points": 20
+  }
+]
