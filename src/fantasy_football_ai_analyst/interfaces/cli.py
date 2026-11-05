@@ -8,13 +8,17 @@ from pathlib import Path
 
 from fantasy_football_ai_analyst.analysis import (
     SORT_OPTIONS,
+    add_next_opponent,
     find_players,
     resolve_team_filter,
     shortlist_players,
 )
-from fantasy_football_ai_analyst.data import load_players
+from fantasy_football_ai_analyst.data import load_fixtures, load_players
 from fantasy_football_ai_analyst.player import POSITIONS, Player
 
+
+PLAYER_DATA_FILE = Path("data/local/fpl-bootstrap.json")
+FIXTURE_DATA_FILE = Path("data/local/fpl-fixtures.json")
 
 METRIC_NOTE = (
     "Pts/m = season points / current price (GBP millions). "
@@ -41,10 +45,7 @@ def _build_parser() -> argparse.ArgumentParser:
     list_command.add_argument("--min-minutes", type=int, default=0, help="Minimum minutes played.")
     list_command.add_argument("--sort", choices=SORT_OPTIONS, default="points")
     list_command.add_argument("--limit", type=int, help="Show at most this many players.")
-    list_command.add_argument(
-        "--team", type=str,
-        help="Filter by team name (case-insensitive); unrecognized names skip this filter.",
-    )
+    list_command.add_argument("--team", type=str, help="Filter by team name (case-insensitive); unrecognized names skip this filter.")
 
     compare_command = commands.add_parser(
         "compare", help="Compare two players' statistics and observed value."
@@ -57,9 +58,9 @@ def _build_parser() -> argparse.ArgumentParser:
     )
 
     for command in (list_command, compare_command):
-        source = command.add_mutually_exclusive_group(required=True)
-        source.add_argument("--data-file", type=Path, help="Path to a saved player JSON file.")
-        source.add_argument("--demo", action="store_true", help="Use bundled fictional players.")
+        command.add_argument(
+            "--demo", action="store_true", help="Use bundled fictional players instead of local data."
+        )
 
     return parser
 
@@ -71,15 +72,16 @@ def _format_players(players: Sequence[Player]) -> str:
     name_width = max(20, max(len(player.name) for player in players))
     rows = [
         f"{'ID':>5}  {'PLAYER':<{name_width}} {'POS':<4} {'GBP m':>7} "
-        f"{'POINTS':>7} {'MINUTES':>8} {'Pts/m':>7} {'Pts/90':>7}"
-        f"{'TEAM':>20}"
+        f"{'POINTS':>7} {'MINUTES':>8} {'Pts/m':>7} {'Pts/90':>7} "
+        f"{'TEAM':>20} {'NEXT OPPONENT':>20}"
     ]
     for player in players:
         rows.append(
             f"{_format_value(player.player_id):>5}  {player.name:<{name_width}} "
             f"{player.position:<4} {player.price:>7.1f} {player.total_points:>7} "
             f"{_format_value(player.minutes):>8} {_format_value(player.points_per_million):>7} "
-            f"{_format_value(player.points_per_90):>7} {_format_value(player.team_name):>20}"
+            f"{_format_value(player.points_per_90):>7} {_format_value(player.team_name):>20} "
+            f"{_format_value(player.next_opponent):>20}"
         )
     return "\n".join(rows)
 
@@ -107,6 +109,7 @@ def _format_comparison(first: Player, second: Player) -> str:
         ("Pts/m", first.points_per_million, second.points_per_million),
         ("Pts/90", first.points_per_90, second.points_per_90),
         ("Team name", first.team_name, second.team_name),
+        ("Next Opponent", first.next_opponent, second.next_opponent),
     ]
     for label, first_value, second_value in statistics:
         rows.append(
@@ -125,10 +128,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         if arguments.demo:
             sample = files("fantasy_football_ai_analyst").joinpath("sample_players.json")
             with as_file(sample) as data_path:
-                players = load_players(data_path)
+                players, team_names  = load_players(data_path)
+            fixtures = []
             print("DEMO: fictional players and statistics, not current FPL data.\n")
         else:
-            players = load_players(arguments.data_file)
+            players, team_names = load_players(PLAYER_DATA_FILE)
+            fixtures = load_fixtures(FIXTURE_DATA_FILE)
 
         if arguments.command == "demo":
             print(_format_players(shortlist_players(players)))
@@ -153,12 +158,18 @@ def main(argv: Sequence[str] | None = None) -> int:
                 limit=arguments.limit,
                 team=team,
             )
-            print(_format_players(selected_players))
+            players_with_opponents: list[Player] = []
+            for player in selected_players:
+                updated_player = add_next_opponent(player, fixtures, team_names)
+                players_with_opponents.append(updated_player)
+            print(_format_players(players_with_opponents))
             print(f"\n{METRIC_NOTE}")
             return 0
 
         if arguments.command == "compare":
             first, second = find_players(players, arguments.player_names)
+            first = add_next_opponent(first, fixtures, team_names)
+            second = add_next_opponent(second, fixtures, team_names)
             print(_format_comparison(first, second))
             print(f"\n{METRIC_NOTE}")
             return 0

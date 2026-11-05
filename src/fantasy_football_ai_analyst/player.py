@@ -21,6 +21,7 @@ class Player:
     goals: int | None = None
     assists: int | None = None
     team_name : str | None = None
+    next_opponent : str | None = None
 
     @property
     def position(self) -> str:

@@ -2,7 +2,8 @@
 
 import math
 from collections.abc import Sequence
-
+from dataclasses import replace
+from datetime import datetime
 from fantasy_football_ai_analyst.player import POSITIONS, Player
 
 
@@ -116,3 +117,37 @@ def shortlist_players(
         return (False, order, player.name.casefold(), player.player_id or 0)
 
     return sorted(selected, key=ranking_key)[:limit]
+
+
+def upcoming_fixtures_for_team(fixtures, team_id):
+    upcoming = []
+
+    for fixture in fixtures:
+        if (fixture['team_h'] == team_id or fixture['team_a'] == team_id) and fixture['finished'] is not True and fixture["started"] is False:
+            upcoming.append(fixture)
+
+    return sorted(
+        upcoming,
+        # Undated matches follow scheduled matches. Parse dates so offsets sort correctly.
+        key=lambda fixture: (
+            fixture.get("kickoff_time") is None,
+            datetime.fromisoformat(fixture["kickoff_time"].replace("Z", "+00:00"))
+            if fixture.get("kickoff_time") is not None else None,
+        ),
+    )
+
+def add_next_opponent(player, fixtures, team_names):
+    matches = upcoming_fixtures_for_team(fixtures, player.team_id)
+    opponent_name = None
+
+    if matches:
+        next_match = matches[0]
+
+        if next_match["team_h"] == player.team_id:
+            opponent_id = next_match["team_a"]
+        else:
+            opponent_id = next_match["team_h"]
+
+        opponent_name = team_names.get(opponent_id)
+
+    return replace(player, next_opponent=opponent_name)

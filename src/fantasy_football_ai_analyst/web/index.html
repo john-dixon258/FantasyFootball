@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#133f35">
+  <meta name="description" content="Your FPL scouting desk. Explore player statistics, build a shortlist, and compare your next picks.">
+  <title>Touchline — Your FPL scouting desk</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="stylesheet" href="/assets/styles.css">
+  <script type="module" src="/assets/app.js"></script>
+</head>
+<body>
+  <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h15m-6-6 6 6-6 6"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3 2.8 5.8 6.4.9-4.6 4.5 1.1 6.3-5.7-3-5.7 3 1.1-6.3L2.8 9.7l6.4-.9Z"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+    <symbol id="i-compare" viewBox="0 0 24 24"><path d="M8 3v18M16 3v18M3 8l5-5 5 5m-2 8 5 5 5-5"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 8a8 8 0 1 0 .2 7M20 3v5h-5"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v.1"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="m10 14 4-4m-5 7-1 1a4 4 0 0 1-6-6l4-4a4 4 0 0 1 6 0m0 8a4 4 0 0 0 6 0l4-4a4 4 0 0 0-6-6l-1 1"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3"/><circle cx="15" cy="17" r="3"/></symbol>
+    <symbol id="i-shirt" viewBox="0 0 64 64"><path d="m23 9-12 6-8 15 12 6 5-8v28h24V28l5 8 12-6-8-15-12-6c-1 9-17 9-18 0Z"/></symbol>
+  </svg>
+
+  <a class="skip-link" href="#main-content">Skip to player explorer</a>
+  <aside class="sidebar" aria-label="Workspace navigation">
+    <a class="brand" href="/" aria-label="Touchline home"><span class="brand-mark">t<span>/</span></span><span>touchline<span class="brand-caption">THE FPL SCOUTING DESK</span></span></a>
+    <div class="workspace-label">YOUR WORKSPACE</div>
+    <nav class="main-nav">
+      <button class="nav-item active" id="nav-explorer" type="button" aria-current="page"><svg class="icon"><use href="#i-grid"/></svg><span>Player explorer</span><span class="nav-indicator"></span></button>
+      <button class="nav-item" id="nav-saved" type="button"><svg class="icon"><use href="#i-star"/></svg><span>My shortlist</span><span class="nav-count" id="saved-nav-count">0</span></button>
+      <button class="nav-item" id="nav-compare" type="button"><svg class="icon"><use href="#i-compare"/></svg><span>Compare players</span><span class="nav-count" id="compare-nav-count">0</span></button>
+    </nav>
+    <div class="sidebar-note"><span class="little-cross">+</span><p>Good picks.<br>Great weekends.</p><span>A little homework goes a long way.</span><div class="mini-pitch" aria-hidden="true"><span></span><i></i></div></div>
+    <button class="sidebar-help" id="data-guide" type="button"><svg class="icon"><use href="#i-info"/></svg>Data &amp; metrics<svg class="icon small"><use href="#i-arrow"/></svg></button>
+    <div class="sidebar-bottom"><span class="status-dot"></span>YOUR PERSONAL ANALYST<span class="sidebar-version">V.01</span></div>
+  </aside>
+
+  <main id="main-content" class="main">
+    <header class="topbar"><div class="breadcrumb">WORKSPACE <span>/</span> <strong id="breadcrumb-current">PLAYER EXPLORER</strong></div><div class="topbar-actions"><span id="snapshot-status" class="snapshot-status"><span class="status-dot"></span><span>Loading snapshot</span></span><button id="refresh-data" class="icon-button" type="button" aria-label="Reload saved data" title="Reload saved data"><svg class="icon"><use href="#i-refresh"/></svg></button><span class="user-avatar" aria-label="Your workspace">YOU</span></div></header>
+
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-copy"><div class="eyebrow"><span class="eyebrow-line"></span> A CLEARER VIEW OF THE GAME</div><h1 id="hero-title">A BETTER PICK.<br><span>STARTS HERE.</span></h1><p>Find the value. Make the comparison.<br>Go into the next gameweek with a little more conviction.</p><div class="dataset-strip"><span><strong id="dataset-players">—</strong> player records</span><i></i><span><strong id="dataset-teams">—</strong> clubs</span><i></i><span>Premier League</span></div></div>
+      <div class="hero-art"><div class="art-topline"><span class="art-badge">THE SCOUT'S PERSPECTIVE</span><span class="art-cross">↗</span></div><svg class="tactics-pitch" viewBox="0 0 400 220" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="1"><path d="M55 28h290v164H55zM200 28v164"/><circle cx="200" cy="110" r="35"/><path d="M55 68h43v84H55m290-84h-43v84h43M55 88h18v44H55m290-44h-18v44h18"/><path d="M98 88a28 28 0 0 1 0 44m204-44a28 28 0 0 0 0 44"/></g><path d="m126 147 65-79 85 53" stroke="#c7ee75" stroke-width="1.5" stroke-dasharray="5 6"/><circle cx="126" cy="147" r="8" fill="#efb681"/><circle cx="191" cy="68" r="10" fill="#d4f89c"/><circle cx="276" cy="121" r="8" fill="#d4f89c"/><circle cx="191" cy="68" r="21" stroke="#d4f89c" stroke-opacity=".25"/></svg><div class="art-caption"><span>SEE THE NUMBERS.<br>TRUST YOUR NEXT MOVE.</span><span class="art-number">01<span>/</span></span></div></div>
+    </section>
+
+    <section class="explorer" aria-labelledby="explorer-title">
+      <div class="section-heading"><div><span class="eyebrow section-eyebrow">LESS GUESSWORK. MORE GAME PLAN.</span><h2 id="explorer-title">The player room<span class="heading-dot">.</span></h2></div><button id="copy-view" class="text-button" type="button"><svg class="icon"><use href="#i-link"/></svg>Copy this view</button></div>
+
+      <form id="filter-form" class="filter-panel" aria-label="Player filters">
+        <div class="filter-panel-top"><div class="position-group" role="group" aria-label="Player position"><button type="button" class="position-tab active" data-position="" aria-pressed="true">All positions</button><button type="button" class="position-tab" data-position="GK" aria-pressed="false">GK</button><button type="button" class="position-tab" data-position="DEF" aria-pressed="false">DEF</button><button type="button" class="position-tab" data-position="MID" aria-pressed="false">MID</button><button type="button" class="position-tab" data-position="FWD" aria-pressed="false">FWD</button></div><button id="reset-filters" class="reset-button" type="button"><svg class="icon small"><use href="#i-refresh"/></svg>Reset filters</button></div>
+        <div class="filter-fields"><div class="filter-field"><label for="team-filter">CLUB</label><select id="team-filter" name="team"><option value="">All clubs</option></select></div><div class="filter-field price-field"><label for="price-filter">MAX. PRICE <output id="price-output" for="price-filter">£20.0m</output></label><input type="range" id="price-filter" name="max_price" min="0" max="20" step="0.5" value="20" aria-label="Maximum player price in millions"><div class="range-labels"><span>£0m</span><span id="price-max-label">£20m</span></div></div><div class="filter-field"><label for="minutes-filter">MINUTES PLAYED</label><select id="minutes-filter" name="min_minutes"><option value="0">Any minutes</option><option value="450">450+ minutes</option><option value="900">900+ minutes</option><option value="1800">1,800+ minutes</option></select></div><button class="primary-button apply-button" type="submit"><svg class="icon"><use href="#i-sliders"/></svg>Find players<svg class="icon small"><use href="#i-arrow"/></svg></button></div>
+      </form>
+
+      <div class="results-toolbar"><div class="results-heading"><h3 id="results-title">All players</h3><span class="result-count" id="result-count">—</span><button id="clear-saved" class="text-button clear-saved" type="button" hidden>Clear shortlist</button></div><div class="results-tools"><label class="search-field"><svg class="icon"><use href="#i-search"/></svg><input type="search" id="player-search" placeholder="Search players or clubs…" aria-label="Search players or clubs"></label><div class="sort-field"><label for="sort-select">Sort by</label><select id="sort-select"><option value="points">Total points</option><option value="points-per-million">Points per £m</option><option value="points-per-90">Points per 90</option><option value="price">Price: low to high</option></select></div><button class="icon-button export-button" id="export-csv" type="button" aria-label="Export current results as CSV" title="Export current results as CSV"><svg class="icon"><use href="#i-download"/></svg></button></div></div>
+
+      <div id="filter-warnings" class="warning-banner" role="status" hidden></div>
+      <div id="active-filters" class="active-filters" aria-label="Applied filters" hidden></div>
+      <div class="table-panel" id="table-panel" aria-busy="true"><div class="table-scroll"><table id="players-table"><caption class="sr-only">Player statistics. Select up to two players to compare, or star players to save them.</caption><thead><tr><th scope="col" class="save-column"><svg class="icon small" aria-hidden="true"><use href="#i-star"/></svg><span class="sr-only">Save</span></th><th scope="col" class="player-column">PLAYER</th><th scope="col">POS.</th><th scope="col"><button class="column-sort" data-sort="price" type="button">PRICE<span aria-hidden="true">↗</span></button></th><th scope="col" aria-sort="descending"><button class="column-sort" data-sort="points" type="button">POINTS<span aria-hidden="true">↓</span></button></th><th scope="col"><button class="column-sort" data-sort="points-per-million" type="button">PTS / £m<span aria-hidden="true">↗</span></button></th><th scope="col">MINUTES</th><th scope="col">NEXT OPPONENT</th><th scope="col" class="compare-column"><svg class="icon small" aria-hidden="true"><use href="#i-compare"/></svg><span class="sr-only">Compare</span></th></tr></thead><tbody id="player-rows"></tbody></table></div><div id="table-state" class="table-state" role="status"><div class="loading-spinner"></div><h3>Opening the player room</h3><p>Reading your saved player and fixture data.</p></div><div class="table-footer" id="table-footer" hidden><span id="pagination-summary"></span><div class="pagination"><button class="icon-button previous-page" id="previous-page" type="button" aria-label="Previous page"><svg class="icon small"><use href="#i-chevron"/></svg></button><span id="page-label"></span><button class="icon-button" id="next-page" type="button" aria-label="Next page"><svg class="icon small"><use href="#i-chevron"/></svg></button></div></div></div>
+      <div class="table-note"><span><svg class="icon small"><use href="#i-info"/></svg>Season statistics, not predictions. Minutes give the numbers context.</span><span><svg class="icon small"><use href="#i-star"/></svg>Star to shortlist. Tick two to compare.</span></div>
+    </section>
+    <footer class="page-footer"><span>touchline<span class="footer-slash">/</span> <span>A little more insight. A better next move.</span></span><span id="file-saved-label">Your data. Your decisions.</span></footer>
+  </main>
+
+  <section class="compare-tray" id="compare-tray" aria-label="Players selected for comparison" hidden><div class="tray-heading"><svg class="icon"><use href="#i-compare"/></svg><span>THE HEAD-TO-HEAD</span><button class="text-button" id="clear-compare" type="button">Clear</button></div><div class="tray-body"><div id="compare-slots" class="compare-slots"></div><button class="primary-button compare-action" id="open-compare" type="button" disabled>Compare players<svg class="icon"><use href="#i-arrow"/></svg></button></div></section>
+
+  <dialog id="compare-dialog" class="dialog compare-dialog" aria-labelledby="compare-title"><div class="dialog-top"><span class="eyebrow">THE HEAD-TO-HEAD</span><button class="icon-button close-dialog" type="button" aria-label="Close comparison"><svg class="icon"><use href="#i-close"/></svg></button></div><h2 id="compare-title">Two picks. A clearer picture.</h2><p class="dialog-intro">The numbers side by side. The decision is yours.</p><div id="comparison-content"></div></dialog>
+  <dialog id="player-dialog" class="dialog player-dialog" aria-labelledby="player-detail-title"><div class="dialog-top"><span class="eyebrow">PLAYER DOSSIER</span><button class="icon-button close-dialog" type="button" aria-label="Close player details"><svg class="icon"><use href="#i-close"/></svg></button></div><div id="player-detail-content"></div></dialog>
+  <dialog id="guide-dialog" class="dialog guide-dialog" aria-labelledby="guide-title"><div class="dialog-top"><span class="eyebrow">A LITTLE CONTEXT</span><button class="icon-button close-dialog" type="button" aria-label="Close data and metrics guide"><svg class="icon"><use href="#i-close"/></svg></button></div><h2 id="guide-title">Know your numbers.</h2><p class="dialog-intro">Useful statistics start with understanding what they measure.</p><dl class="metric-guide"><div><dt>Total points</dt><dd>FPL points recorded so far in your saved dataset.</dd></div><div><dt>Points per £m</dt><dd>Season points divided by the player's current price in millions. A measure of observed value, not a forecast or historical return on investment.</dd></div><div><dt>Points per 90</dt><dd>Season points × 90 ÷ minutes played. Small samples can look impressive; use a minimum-minutes filter for context.</dd></div><div><dt>Next opponent</dt><dd>The first unstarted, unfinished fixture in your saved fixtures. Undated matches follow scheduled matches. A dash means the opponent is unknown.</dd></div><div><dt>Your shortlist</dt><dd>Starred player IDs are saved in this browser on this device. They are not an account or a submitted FPL team. Clear old selections when switching seasons.</dd></div></dl><div class="source-note"><span class="eyebrow">ABOUT THIS SNAPSHOT</span><p>This app reads the files you have saved. File save times show when those local files changed, not when FPL last updated them. There is no live data feed or automatic freshness check.</p><dl id="snapshot-details"><div><dt>Snapshot details</dt><dd>Loading…</dd></div></dl></div></dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+  <noscript><div class="noscript-message">Turn on JavaScript to explore players. The <a href="/docs">API documentation</a> and CLI are also available.</div></noscript>
+</body>
+</html>

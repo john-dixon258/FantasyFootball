@@ -3,7 +3,9 @@
 import unittest
 
 from fantasy_football_ai_analyst.player import Player
-from fantasy_football_ai_analyst.analysis import find_players, shortlist_players
+from fantasy_football_ai_analyst.analysis import (
+    add_next_opponent, find_players, shortlist_players, upcoming_fixtures_for_team,
+)
 
 
 class FindPlayersTests(unittest.TestCase):
@@ -121,6 +123,34 @@ class ShortlistPlayersTests(unittest.TestCase):
         for options in invalid_options:
             with self.subTest(options=options), self.assertRaises(ValueError):
                 shortlist_players(self.players, **options)
+
+
+class UpcomingFixtureTests(unittest.TestCase):
+    def test_orders_actual_instants_with_undated_matches_last(self) -> None:
+        base = {"team_h": 1, "team_a": 2, "started": False, "finished": False}
+        fixtures = [
+            {**base, "id": 1, "kickoff_time": None},
+            {**base, "id": 2, "kickoff_time": "2026-11-06T20:00:00Z"},
+            {**base, "id": 3, "kickoff_time": "2026-11-06T20:30:00+01:00"},
+            {**base, "id": 4, "kickoff_time": "2026-11-06T19:00:00Z", "started": True},
+            {**base, "id": 5, "kickoff_time": "2026-11-06T18:00:00Z", "finished": True},
+        ]
+        result = upcoming_fixtures_for_team(fixtures, 1)
+        self.assertEqual([fixture["id"] for fixture in result], [3, 2, 1])
+
+    def test_unknown_start_status_is_not_treated_as_unstarted(self) -> None:
+        fixture = {"team_h": 1, "team_a": 2, "started": None, "finished": False,
+                   "kickoff_time": None}
+        self.assertEqual(upcoming_fixtures_for_team([fixture], 1), [])
+
+    def test_enrichment_returns_copy_and_leaves_unknown_opponent_missing(self) -> None:
+        player = Player("Alex", 1, 3, 5, 10)
+        fixture = {"team_h": 2, "team_a": 1, "started": False, "finished": False,
+                   "kickoff_time": None}
+        enriched = add_next_opponent(player, [fixture], {2: "Man City"})
+        self.assertEqual(enriched.next_opponent, "Man City")
+        self.assertIsNone(player.next_opponent)
+        self.assertIsNone(add_next_opponent(player, [fixture], {}).next_opponent)
 
 
 if __name__ == "__main__":
