@@ -1,0 +1,44 @@
+[
+  {
+    "document_id": "guide-value",
+    "title": "What points per million tells you",
+    "text": "Points per million measures observed value: season FPL points divided by the player's current price in millions. It describes past performance at today's price. It is not an expected-points prediction or a measure of historical return on the money you paid. Compare minutes and playing position alongside value before shortlisting a player.",
+    "source_name": "Touchline methodology",
+    "source_file": "README.md"
+  },
+  {
+    "document_id": "guide-minutes",
+    "title": "Why points per 90 needs a minutes filter",
+    "text": "Points per 90 is season points multiplied by 90 and divided by minutes played. A very small minutes sample can produce a high rate that is not representative of future performance. Use the minimum-minutes filter to inspect players with a larger sample. Unknown minutes or zero minutes mean this metric is unavailable, not zero.",
+    "source_name": "Touchline methodology",
+    "source_file": "README.md"
+  },
+  {
+    "document_id": "guide-news",
+    "title": "Interpreting saved injury and availability notes",
+    "text": "An injury or availability note in a saved snapshot is evidence of what that snapshot recorded. It is not a live fitness check. The news-added timestamp is preserved from the source and can be old. A player with no saved news does not have confirmed fitness or availability. Check a current primary source before treating a historical note as a current update.",
+    "source_name": "Touchline methodology",
+    "source_file": "README.md"
+  },
+  {
+    "document_id": "guide-snapshot",
+    "title": "File save times and source freshness",
+    "text": "The dashboard's player and fixture file save times show when local files changed. They do not establish when the source last updated the information, when an article was published, or when you downloaded the original data. Publication, retrieval, and source note timestamps are separate pieces of evidence. Unknown dates stay unknown.",
+    "source_name": "Touchline methodology",
+    "source_file": "README.md"
+  },
+  {
+    "document_id": "guide-fixtures",
+    "title": "How the next opponent is chosen",
+    "text": "Touchline finds unstarted, unfinished fixtures for a player's team and orders scheduled kickoff times chronologically, respecting timezone offsets. Undated matches follow scheduled matches. The first fixture supplies the next opponent. Missing fixtures or unknown opponent names remain unavailable. This uses your saved fixture file and does not update automatically from live games.",
+    "source_name": "Touchline methodology",
+    "source_file": "README.md"
+  },
+  {
+    "document_id": "guide-forecast",
+    "title": "Season statistics and future points",
+    "text": "Total points, goals, assists, points per million, and points per 90 describe recorded performance. They are not forecasts of future points or guaranteed returns. Future player-point predictions require a separate baseline or model evaluated on later gameweeks using only information available before each prediction. Retrieved news and an LLM explanation cannot replace that evaluation.",
+    "source_name": "Touchline methodology",
+    "source_file": "README.md"
+  }
+]

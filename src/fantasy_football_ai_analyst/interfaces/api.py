@@ -1,7 +1,7 @@
 """HTTP input and JSON output around the same analysis used by the CLI."""
 
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Annotated, Literal
 
@@ -18,10 +18,12 @@ from fantasy_football_ai_analyst.analysis import (
 )
 from fantasy_football_ai_analyst.data import load_fixtures, load_players
 from fantasy_football_ai_analyst.player import Player
+from fantasy_football_ai_analyst.knowledge import load_knowledge, mentioned_players, search_documents
 
 
 PLAYER_DATA_FILE = Path("data/local/fpl-bootstrap.json")
 FIXTURE_DATA_FILE = Path("data/local/fpl-fixtures.json")
+KNOWLEDGE_NOTES_FILE = Path("data/local/football-notes.json")
 WEB_DIRECTORY = Path(__file__).resolve().parents[1] / "web"
 logger = logging.getLogger(__name__)
 
@@ -71,6 +73,38 @@ class DatasetResponse(BaseModel):
     fixtures_file_saved_at: datetime
 
 
+class EvidenceResponse(BaseModel):
+    document_id: str
+    source_document_id: str
+    chunk_index: int
+    title: str
+    text: str
+    player_id: int | None
+    player_name: str | None
+    player_names: list[str]
+    source_type: Literal["fpl_news", "curated_note"]
+    source_name: str
+    source_file: str | None
+    source_url: str | None
+    news_added: datetime | None
+    published_at: datetime | None
+    retrieved_at: datetime | None
+    matched_words: list[str]
+    match_count: int
+    score: int = Field(description="Keyword ranking score, not a confidence or probability.")
+
+
+class KnowledgeResults(BaseModel):
+    query: str
+    results: list[EvidenceResponse]
+    count: int
+    document_count: int
+    matched_players: list[str]
+    status: Literal["evidence_found", "insufficient_evidence"]
+    retrieval_method: str = "player-aware keyword retrieval"
+    warnings: list[str]
+
+
 def get_data() -> tuple[list[Player], list[dict], dict[int, str]]:
     """Read once per request so replacing a snapshot needs no server restart."""
     try:
@@ -83,6 +117,56 @@ def get_data() -> tuple[list[Player], list[dict], dict[int, str]]:
             detail="Local FPL data is unavailable or invalid. Check the saved JSON files and server log.",
         ) from error
     return players, fixtures, team_names
+
+
+def get_knowledge() -> tuple[list[dict], list[dict]]:
+    """Search reads player news independently of fixture-file availability."""
+    try:
+        return load_knowledge(
+            PLAYER_DATA_FILE,
+            notes_file=KNOWLEDGE_NOTES_FILE if KNOWLEDGE_NOTES_FILE.exists() else None,
+        )
+    except ValueError as error:
+        logger.error("Cannot load local knowledge: %s", error)
+        raise HTTPException(status_code=503, detail=str(error)) from error
+
+
+@app.get(
+    "/knowledge/search", response_model=KnowledgeResults,
+    responses={503: {"description": "Knowledge source or NLTK corpus unavailable"}},
+)
+def search_knowledge(
+    data: Annotated[tuple[list[dict], list[dict]], Depends(get_knowledge)],
+    query: Annotated[str, Query(min_length=1, max_length=400, pattern=r"\S")],
+    limit: Annotated[int, Query(ge=1, le=20)] = 5,
+) -> KnowledgeResults:
+    """Retrieve sourced evidence. This endpoint does not generate an LLM answer."""
+    documents, players = data
+    try:
+        results = search_documents(documents, query, limit=limit, players=players)
+        names = [player["player_name"] for player in mentioned_players(query, players)]
+    except ValueError as error:
+        logger.error("Knowledge search unavailable: %s", error)
+        raise HTTPException(status_code=503, detail=str(error)) from error
+    warnings = [
+        "Saved evidence is not a live availability check. Verify the dates and original source.",
+        "Keyword scores measure overlap, not factual accuracy or confidence. No LLM answer is generated.",
+    ]
+    if not results:
+        warnings.append("No supporting evidence was found. A missing news note does not confirm fitness.")
+    now = datetime.now(timezone.utc)
+    dated_news = [result for result in results if result["source_type"] == "fpl_news"]
+    if any(not result["news_added"] for result in dated_news):
+        warnings.append("At least one FPL note has no news-added timestamp; its age is unknown.")
+    if any(result["news_added"] and (
+        now - datetime.fromisoformat(result["news_added"].replace("Z", "+00:00"))
+    ) > timedelta(days=14) for result in dated_news):
+        warnings.append("At least one FPL note was added more than 14 days ago. This is an age flag, not a fitness assessment.")
+    return KnowledgeResults(
+        query=query.strip(), results=[EvidenceResponse.model_validate(result) for result in results],
+        count=len(results), document_count=len(documents), matched_players=names,
+        status="evidence_found" if results else "insufficient_evidence", warnings=warnings,
+    )
 
 
 @app.get("/health")

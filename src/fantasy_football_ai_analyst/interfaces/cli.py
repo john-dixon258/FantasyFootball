@@ -15,10 +15,12 @@ from fantasy_football_ai_analyst.analysis import (
 )
 from fantasy_football_ai_analyst.data import load_fixtures, load_players
 from fantasy_football_ai_analyst.player import POSITIONS, Player
+from fantasy_football_ai_analyst.knowledge import load_knowledge, search_documents
 
 
 PLAYER_DATA_FILE = Path("data/local/fpl-bootstrap.json")
 FIXTURE_DATA_FILE = Path("data/local/fpl-fixtures.json")
+KNOWLEDGE_NOTES_FILE = Path("data/local/football-notes.json")
 
 METRIC_NOTE = (
     "Pts/m = season points / current price (GBP millions). "
@@ -38,6 +40,10 @@ def _build_parser() -> argparse.ArgumentParser:
         "demo", help="Try the bundled fictional dataset; no file or network needed."
     )
     demo_command.set_defaults(demo=True)
+
+    search_command = commands.add_parser("search", help="Find saved news and methodology evidence.")
+    search_command.add_argument("query", help="A player name, topic, or short question.")
+    search_command.add_argument("--limit", type=int, default=5, help="Maximum evidence snippets (default: 5).")
 
     list_command = commands.add_parser("list", help="List players in a JSON data file.")
     list_command.add_argument("--position", type=str.upper, choices=list(POSITIONS.values()))
@@ -125,6 +131,24 @@ def main(argv: Sequence[str] | None = None) -> int:
     arguments = parser.parse_args(argv)
 
     try:
+        if arguments.command == "search":
+            documents, catalog = load_knowledge(
+                PLAYER_DATA_FILE,
+                notes_file=KNOWLEDGE_NOTES_FILE if KNOWLEDGE_NOTES_FILE.exists() else None,
+            )
+            results = search_documents(documents, arguments.query, limit=arguments.limit, players=catalog)
+            print("SAVED EVIDENCE: keyword retrieval, not an LLM answer or live availability check.\n")
+            if not results:
+                print("Insufficient evidence. No matching saved notes were found.")
+            for index, result in enumerate(results, start=1):
+                timestamp = result.get("news_added") or result.get("published_at") or "unknown"
+                print(f"[{index}] {result['title']}")
+                print(result["text"])
+                print(f"Source: {result['source_name']} | Note/publication date: {timestamp}")
+                print(f"Location: {result.get('source_url') or result.get('source_file')}")
+                print(f"Matched words: {', '.join(result['matched_words'])}\n")
+            return 0
+
         if arguments.demo:
             sample = files("fantasy_football_ai_analyst").joinpath("sample_players.json")
             with as_file(sample) as data_path:

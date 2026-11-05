@@ -1,3 +1,5 @@
+import { setupResearch } from '/assets/research.js';
+
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
 const PAGE_SIZE = 15;
@@ -10,7 +12,7 @@ const state = {
   knownPlayers: new Map(),
   saved: new Set(),
   selected: [],
-  mode: urlState.get('view') === 'saved' ? 'saved' : 'all',
+  mode: ['saved', 'research'].includes(urlState.get('view')) ? urlState.get('view') : 'all',
   position: ['GK', 'DEF', 'MID', 'FWD'].includes(urlState.get('position')?.toUpperCase())
     ? urlState.get('position').toUpperCase() : '',
   page: 1,
@@ -95,6 +97,11 @@ function syncUrl() {
   const search = $('#player-search').value.trim();
   if (search) params.set('q', search);
   if (state.mode === 'saved') params.set('view', 'saved');
+  if (state.mode === 'research') {
+    params.set('view', 'research');
+    const question = $('#research-query').value.trim();
+    if (question) params.set('question', question);
+  }
   const query = params.toString();
   history.replaceState(null, '', `${location.pathname}${query ? `?${query}` : ''}`);
 }
@@ -148,7 +155,7 @@ function renderTable() {
   $('#result-count').textContent = number.format(players.length);
   $('#results-title').textContent = state.mode === 'saved' ? 'Your shortlist' : 'All players';
   $('#explorer-title').innerHTML = `${state.mode === 'saved' ? 'Your scouting board' : 'The player room'}<span class="heading-dot">.</span>`;
-  $('#breadcrumb-current').textContent = state.mode === 'saved' ? 'MY SHORTLIST' : 'PLAYER EXPLORER';
+  $('#breadcrumb-current').textContent = state.mode === 'research' ? 'RESEARCH DESK' : state.mode === 'saved' ? 'MY SHORTLIST' : 'PLAYER EXPLORER';
   $('#export-csv').disabled = players.length === 0 || !state.ready;
   $$('.column-sort').forEach((button) => {
     const active = button.dataset.sort === state.filters.sort_by;
@@ -201,12 +208,16 @@ function renderNavigation() {
   $('#saved-nav-count').textContent = state.saved.size;
   $('#compare-nav-count').textContent = state.selected.length;
   $('#clear-saved').hidden = state.mode !== 'saved' || state.saved.size === 0;
-  for (const [id, active] of [['nav-explorer', state.mode === 'all'], ['nav-saved', state.mode === 'saved']]) {
+  for (const [id, active] of [['nav-explorer', state.mode === 'all'], ['nav-saved', state.mode === 'saved'], ['nav-research', state.mode === 'research']]) {
     const button = $(`#${id}`);
     button.classList.toggle('active', active);
     if (active) button.setAttribute('aria-current', 'page');
     else button.removeAttribute('aria-current');
   }
+  $('.hero').hidden = state.mode === 'research';
+  $('.explorer').hidden = state.mode === 'research';
+  $('#research-panel').hidden = state.mode !== 'research';
+  $('#breadcrumb-current').textContent = state.mode === 'research' ? 'RESEARCH DESK' : state.mode === 'saved' ? 'MY SHORTLIST' : 'PLAYER EXPLORER';
   $('#compare-tray').hidden = state.selected.length === 0;
   document.body.classList.toggle('has-selection', state.selected.length > 0);
   $('#open-compare').disabled = state.selected.length !== 2;
@@ -329,6 +340,7 @@ function playerDetail(player) {
     ].map(([label, value]) => `<div class="player-stat"><span>${label}</span><strong>${value}</strong></div>`).join('')}</div>
     <div class="player-next-fixture">NEXT OPPONENT<strong>${escape(player.next_opponent || 'No known upcoming opponent')}</strong></div>
     <button id="detail-compare" class="primary-button" type="button" ${player.player_id == null ? 'disabled' : ''}>${icon('compare')}${state.selected.includes(player.player_id) ? 'Remove from comparison' : 'Add to comparison'}</button>
+    <button id="detail-research" class="text-button player-research" type="button">${icon('search')}Find saved news for this player${icon('arrow')}</button>
     <p class="comparison-footnote">Observed statistics from your saved files. Points per 90 can be misleading with a small minutes sample.</p>`;
   $('#detail-compare').addEventListener('click', () => {
     if (state.selected.length === 2 && !state.selected.includes(player.player_id)) {
@@ -337,6 +349,11 @@ function playerDetail(player) {
     }
     toggleCompare(player.player_id);
     $('#player-dialog').close();
+  });
+  $('#detail-research').addEventListener('click', () => {
+    $('#player-dialog').close();
+    setMode('research');
+    research.search(`Any updates on ${player.name}?`);
   });
   showDialog($('#player-dialog'));
 }
@@ -425,6 +442,7 @@ $('#refresh-data').addEventListener('click', initialize);
 $('#nav-explorer').addEventListener('click', () => setMode('all'));
 $('#nav-saved').addEventListener('click', () => setMode('saved'));
 $('#nav-compare').addEventListener('click', openComparison);
+$('#nav-research').addEventListener('click', () => setMode('research'));
 $('#open-compare').addEventListener('click', openComparison);
 $('#data-guide').addEventListener('click', () => showDialog($('#guide-dialog')));
 $('#export-csv').addEventListener('click', exportCsv);
@@ -503,6 +521,8 @@ if (['points', 'price', 'points-per-million', 'points-per-90'].includes(urlState
 $('#player-search').value = urlState.get('q') || '';
 updatePositionTabs();
 updatePrice();
+const research = setupResearch({ request: api, escape, onChange: syncUrl });
 renderNavigation();
 initialize();
+if (state.mode === 'research' && $('#research-query').value.trim()) research.search();
 if (storageWarning) toast('This browser could not read your saved shortlist. You can still explore and select players.');

@@ -8,6 +8,7 @@
   <title>Touchline — Your FPL scouting desk</title>
   <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
   <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="stylesheet" href="/assets/research.css">
   <script type="module" src="/assets/app.js"></script>
 </head>
 <body>
@@ -36,6 +37,7 @@
       <button class="nav-item active" id="nav-explorer" type="button" aria-current="page"><svg class="icon"><use href="#i-grid"/></svg><span>Player explorer</span><span class="nav-indicator"></span></button>
       <button class="nav-item" id="nav-saved" type="button"><svg class="icon"><use href="#i-star"/></svg><span>My shortlist</span><span class="nav-count" id="saved-nav-count">0</span></button>
       <button class="nav-item" id="nav-compare" type="button"><svg class="icon"><use href="#i-compare"/></svg><span>Compare players</span><span class="nav-count" id="compare-nav-count">0</span></button>
+      <button class="nav-item" id="nav-research" type="button"><svg class="icon"><use href="#i-search"/></svg><span>Research desk</span></button>
     </nav>
     <div class="sidebar-note"><span class="little-cross">+</span><p>Good picks.<br>Great weekends.</p><span>A little homework goes a long way.</span><div class="mini-pitch" aria-hidden="true"><span></span><i></i></div></div>
     <button class="sidebar-help" id="data-guide" type="button"><svg class="icon"><use href="#i-info"/></svg>Data &amp; metrics<svg class="icon small"><use href="#i-arrow"/></svg></button>
@@ -48,6 +50,17 @@
     <section class="hero" aria-labelledby="hero-title">
       <div class="hero-copy"><div class="eyebrow"><span class="eyebrow-line"></span> A CLEARER VIEW OF THE GAME</div><h1 id="hero-title">A BETTER PICK.<br><span>STARTS HERE.</span></h1><p>Find the value. Make the comparison.<br>Go into the next gameweek with a little more conviction.</p><div class="dataset-strip"><span><strong id="dataset-players">—</strong> player records</span><i></i><span><strong id="dataset-teams">—</strong> clubs</span><i></i><span>Premier League</span></div></div>
       <div class="hero-art"><div class="art-topline"><span class="art-badge">THE SCOUT'S PERSPECTIVE</span><span class="art-cross">↗</span></div><svg class="tactics-pitch" viewBox="0 0 400 220" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="1"><path d="M55 28h290v164H55zM200 28v164"/><circle cx="200" cy="110" r="35"/><path d="M55 68h43v84H55m290-84h-43v84h43M55 88h18v44H55m290-44h-18v44h18"/><path d="M98 88a28 28 0 0 1 0 44m204-44a28 28 0 0 0 0 44"/></g><path d="m126 147 65-79 85 53" stroke="#c7ee75" stroke-width="1.5" stroke-dasharray="5 6"/><circle cx="126" cy="147" r="8" fill="#efb681"/><circle cx="191" cy="68" r="10" fill="#d4f89c"/><circle cx="276" cy="121" r="8" fill="#d4f89c"/><circle cx="191" cy="68" r="21" stroke="#d4f89c" stroke-opacity=".25"/></svg><div class="art-caption"><span>SEE THE NUMBERS.<br>TRUST YOUR NEXT MOVE.</span><span class="art-number">01<span>/</span></span></div></div>
+    </section>
+
+    <section id="research-panel" class="research-panel" aria-labelledby="research-title" hidden>
+      <div class="research-heading"><div class="eyebrow"><span class="eyebrow-line"></span> FOLLOW THE EVIDENCE</div><h1 id="research-title">GOOD QUESTIONS.<br><span>GROUNDED DECISIONS.</span></h1><p>Find the saved news behind a player, or get some context for the numbers.<br>Every passage keeps its source. Every unknown stays visible.</p></div>
+      <form id="research-form" class="research-form"><label for="research-query">WHAT WOULD YOU LIKE TO INVESTIGATE?</label><div class="research-input-row"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><input id="research-query" name="question" type="search" maxlength="400" required placeholder="Any updates on Saka?" autocomplete="off"><button id="research-submit" class="primary-button" type="submit">Find evidence<svg class="icon small"><use href="#i-arrow"/></svg></button></div><div class="research-suggestions"><span>TRY A QUESTION</span><button type="button" data-research-question="Any updates on Saka?">Any updates on Saka?</button><button type="button" data-research-question="Why use a minutes filter?">Why use a minutes filter?</button><button type="button" data-research-question="What does points per million mean?">What does points per £m mean?</button></div></form>
+      <div class="research-boundary"><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg><p><strong>Evidence first.</strong> This is local keyword retrieval, not a generated answer or a live fitness check. Read the note dates before using the information.</p><span class="research-method">RETRIEVAL PREVIEW</span></div>
+      <div class="research-results-heading"><div><h2>From the source<span class="heading-dot">.</span></h2><p id="research-result-summary" role="status">Your next question starts here.</p></div><label class="research-limit" for="research-limit">Show<select id="research-limit"><option value="3">3 passages</option><option value="5" selected>5 passages</option><option value="10">10 passages</option></select></label></div>
+      <div id="research-focus" class="research-focus" hidden></div>
+      <div id="research-warnings" class="research-warnings" hidden></div>
+      <div id="research-results" class="research-results" aria-busy="false"></div>
+      <div id="research-state" class="research-state"><div class="research-state-mark" aria-hidden="true">?</div><h3>Curiosity is a good starting point.</h3><p>Look up a player's saved news, explore a football topic, or ask how a metric works.</p><span>YOUR SAVED DATA + TOUCHLINE METHODOLOGY</span></div>
     </section>
 
     <section class="explorer" aria-labelledby="explorer-title">
